@@ -63,7 +63,9 @@ const returnBike = async (rentalId: Types.ObjectId): Promise<Partial<TRental>> =
 
 		_id: rental._id,
 		userId: rental.userId,
-		bikeId: rental.bikeId._id,
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		bikeId: (rental.bikeId as any)._id,
+
 		startTime: rental.startTime,
 		returnTime: rental.returnTime,
 		totalCost: rental.totalCost,

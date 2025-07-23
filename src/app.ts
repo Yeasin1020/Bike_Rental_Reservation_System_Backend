@@ -10,24 +10,27 @@ import router from './app/routes';
 
 const app: Application = express();
 
-//parsers
+// Parsers
 app.use(express.json());
+
+// ✅ Correct CORS setup
 const corsOptions = {
-  origin: "http://localhost:5173", // Replace with your frontend's URL
-  credentials: true, // Allow credentials (cookies, Authorization headers, etc.)
+  origin: ['http://localhost:5173', 'https://bike-rental-reservation-delta.vercel.app'],
+  credentials: true,
 };
+
 app.use(cors(corsOptions));
 
-// application routes
+// Application routes
 app.use('/api', router);
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("deployment successfully done")
-})
+app.get('/', (req: Request, res: Response) => {
+  res.send('Deployment successfully done');
+});
 
 app.use(globalErrorHandler);
 
-//Not Found
+// Not Found
 app.use(notFound);
 
 export default app;

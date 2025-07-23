@@ -7,6 +7,7 @@ const router = express.Router();
 
 router.post('/', authenticate, adminMiddleware, BikeController.createBike);
 router.get('/', BikeController.getAllBikes);
+router.get('/:id', BikeController.getSingleBike);
 router.put('/:id', authenticate, BikeController.updateBike);
 router.delete('/:id', authenticate, BikeController.deleteBike);
 

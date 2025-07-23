@@ -26,6 +26,19 @@ const getAllBikesFromDb = async () => {
 	return await Bike.find(); // Retrieve all bikes from the database
 };
 
+const getSingleBikeById = async (id: string) => {
+	if (!Types.ObjectId.isValid(id)) {
+		throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid bike ID');
+	}
+
+	const bike = await Bike.findById(id).populate('owner', '-password');
+
+	if (!bike) {
+		throw new ApiError(httpStatus.NOT_FOUND, 'Bike not found');
+	}
+
+	return bike;
+};
 const updateBikeIntoDb = async (id: string, updateData: Partial<TBike>) => {
 	const updatedBike = await Bike.findByIdAndUpdate(id, updateData, { new: true }).lean().exec();
 	if (!updatedBike) {
@@ -50,6 +63,7 @@ const deleteBikeFromDb = async (id: string) => {
 export const BikeService = {
 	createBikeIntoDb,
 	getAllBikesFromDb,
+	getSingleBikeById,
 	updateBikeIntoDb,
 	deleteBikeFromDb
 };
