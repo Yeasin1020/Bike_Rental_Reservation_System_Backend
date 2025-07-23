@@ -1,7 +1,9 @@
-import { Schema } from "mongoose";
+import { Types } from "mongoose";
+
 export type TRental = {
-	userId: Schema.Types.ObjectId;
-	bikeId: Schema.Types.ObjectId;
+	_id: Types.ObjectId;
+	userId: Types.ObjectId;
+	bikeId: Types.ObjectId;
 	startTime: Date;
 	returnTime?: Date | null;
 	totalCost: number;
