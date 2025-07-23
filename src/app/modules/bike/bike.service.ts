@@ -3,12 +3,23 @@
 import { Types } from "mongoose";
 import { TBike } from "./bike.interface";
 import Bike from "./bike.model";
+import httpStatus from "http-status";
+import ApiError from "../../errors/ApiError";
 
 
 const createBikeIntoDb = async (bikeData: Partial<TBike>) => {
-	const newBike = new Bike(bikeData);
-	await newBike.save();
-	return newBike;
+	try {
+		const newBike = new Bike(bikeData);
+		await newBike.save();
+		return newBike;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	} catch (error: any) {
+		if (error.code === 11000) {
+			// Duplicate key error from MongoDB
+			throw new ApiError(httpStatus.CONFLICT, 'A similar bike already exists for this owner.');
+		}
+		throw error;
+	}
 };
 
 const getAllBikesFromDb = async () => {

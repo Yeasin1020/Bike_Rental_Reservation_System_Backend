@@ -7,5 +7,6 @@ const router = express.Router();
 router.post('/', authenticate, RentalController.createRental);
 router.put('/:id/return', authenticate, adminMiddleware, RentalController.returnBike);
 router.get('/', authenticate, RentalController.getAllRentalsForUser);
+router.get('/allRentals', authenticate, RentalController.getAllRentals);
 
 export const RentalRoutes = router;

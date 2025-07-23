@@ -4,9 +4,21 @@ import httpStatus from 'http-status';
 import { BikeService } from './bike.service';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
+import ApiError from '../../errors/ApiError';
 
 const createBike = catchAsync(async (req: Request, res: Response) => {
-	const newBike = await BikeService.createBikeIntoDb(req.body);
+	const user = req.user;
+
+	if (!user?._id) {
+		throw new ApiError(httpStatus.UNAUTHORIZED, 'Unauthorized user');
+	}
+
+	const bikeData = {
+		...req.body,
+		owner: user._id,
+	};
+
+	const newBike = await BikeService.createBikeIntoDb(bikeData);
 
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
@@ -15,6 +27,8 @@ const createBike = catchAsync(async (req: Request, res: Response) => {
 		data: newBike,
 	});
 });
+
+
 
 const getAllBikes = catchAsync(async (req: Request, res: Response) => {
 	const bikes = await BikeService.getAllBikesFromDb();

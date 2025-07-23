@@ -12,7 +12,11 @@ const app: Application = express();
 
 //parsers
 app.use(express.json());
-app.use(cors());
+const corsOptions = {
+  origin: "http://localhost:5173", // Replace with your frontend's URL
+  credentials: true, // Allow credentials (cookies, Authorization headers, etc.)
+};
+app.use(cors(corsOptions));
 
 // application routes
 app.use('/api', router);

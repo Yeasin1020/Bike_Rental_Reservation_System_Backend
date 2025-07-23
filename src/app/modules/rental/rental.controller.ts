@@ -46,8 +46,24 @@ const getAllRentalsForUser = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const getAllRentals = catchAsync(async (req: Request, res: Response) => {
+	const userId = req.user._id; // Get userId from authenticated user
+	const isAdmin = req.user.role === 'admin'; // Assuming role is set in user object
+
+	// If the user is an admin, they can fetch all rentals; otherwise, fetch rentals only for the authenticated user
+	const rentals = await RentalService.getAllRentals(isAdmin ? undefined : new Types.ObjectId(userId));
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: 'Rentals retrieved successfully',
+		data: rentals,
+	});
+});
+
 export const RentalController = {
 	createRental,
 	returnBike,
-	getAllRentalsForUser
+	getAllRentalsForUser,
+	getAllRentals
 };

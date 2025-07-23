@@ -72,6 +72,14 @@ const returnBike = async (rentalId: Types.ObjectId): Promise<Partial<TRental>> =
 
 	return responseData;
 };
+const getAllRentals = async (userId?: Types.ObjectId): Promise<TRental[]> => {
+	if (userId) {
+		return Rental.find({ userId });
+	} else {
+		// If no userId is provided, return all rentals (for admin view)
+		return Rental.find().populate('userId bikeId');
+	}
+};
 
 const getAllRentalsForUser = async (userId: Types.ObjectId): Promise<TRental[]> => {
 	const rentals = await Rental.find({ userId });
@@ -81,5 +89,6 @@ const getAllRentalsForUser = async (userId: Types.ObjectId): Promise<TRental[]> 
 export const RentalService = {
 	createRental,
 	returnBike,
-	getAllRentalsForUser
+	getAllRentalsForUser,
+	getAllRentals
 };
