@@ -1,0 +1,60 @@
+import Bike from "../bike/bike.model";
+import { IReview, IReviewInput } from "./review.interface";
+import { Review } from "./review.model";
+
+const createReview = async (reviewData: IReviewInput): Promise<IReview> => {
+	const review = await Review.create(reviewData);
+
+	const allReviews = await Review.find({ bike: review.bike });
+	const avgRating = allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
+
+	await Bike.findByIdAndUpdate(review.bike, {
+		averageRating: parseFloat(avgRating.toFixed(1)), // convert string to number here
+		totalRatings: allReviews.length,
+	});
+
+	return review;
+};
+
+const likeReview = async (reviewId: string, userId: string) => {
+	const review = await Review.findById(reviewId);
+	if (!review) throw new Error('Review not found');
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	if (review.likes?.includes(userId as any)) {
+		review.likes = review.likes.filter(id => id.toString() !== userId);
+	} else {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		review.likes?.push(userId as any);
+	}
+
+	return await review.save();
+};
+
+const addComment = async (reviewId: string, userId: string, text: string) => {
+	const review = await Review.findById(reviewId);
+	if (!review) throw new Error('Review not found');
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	review.comments?.push({ user: userId as any, text });
+	return await review.save();
+};
+
+const addReply = async (reviewId: string, commentId: string, userId: string, text: string) => {
+	const review = await Review.findById(reviewId);
+	if (!review) throw new Error('Review not found');
+
+	const comment = review.comments?.id(commentId);
+	if (!comment) throw new Error('Comment not found');
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	comment.replies?.push({ user: userId as any, text });
+	return await review.save();
+};
+
+export const ReviewService = {
+	createReview,
+	likeReview,
+	addComment,
+	addReply,
+};
