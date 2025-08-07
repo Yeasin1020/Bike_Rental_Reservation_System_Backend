@@ -100,3 +100,46 @@ export const getMyReviews = catchAsync(async (req: Request, res: Response) => {
 		data: reviews,
 	});
 });
+
+
+export const getAllReviews = catchAsync(async (req: Request, res: Response) => {
+	const reviews = await ReviewService.getAllReviews();
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: 'Fetched all reviews successfully',
+		data: reviews,
+	});
+});
+
+export const deleteReview = catchAsync(async (req: Request, res: Response) => {
+	const { reviewId } = req.params;
+
+	if (!mongoose.Types.ObjectId.isValid(reviewId)) {
+		return res.status(400).json({ success: false, message: 'Invalid review ID' });
+	}
+
+	const deleted = await ReviewService.deleteReview(reviewId);
+	if (!deleted) {
+		return res.status(404).json({ success: false, message: 'Review not found' });
+	}
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: 'Review deleted successfully',
+		data: deleted,
+	});
+});
+
+export const getPublicReviews = catchAsync(async (req: Request, res: Response) => {
+	const reviews = await ReviewService.getPublicReviews();
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: 'Fetched public reviews successfully',
+		data: reviews,
+	});
+});

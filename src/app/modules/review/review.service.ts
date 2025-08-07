@@ -67,10 +67,47 @@ const getMyReviews = async (userId: string) => {
 	return reviews;
 };
 
+const getAllReviews = async (): Promise<IReview[]> => {
+	return Review.find()
+		.populate('user', 'name email')
+		.populate('bike', 'model brand')
+		.populate('comments.user', 'name')
+		.populate('comments.replies.user', 'name')
+		.sort({ createdAt: -1 });
+};
+
+const deleteReview = async (reviewId: string): Promise<IReview | null> => {
+	const review = await Review.findByIdAndDelete(reviewId);
+
+	if (review) {
+		const allReviews = await Review.find({ bike: review.bike });
+		const avgRating =
+			allReviews.reduce((sum, r) => sum + r.rating, 0) / (allReviews.length || 1);
+
+		await Bike.findByIdAndUpdate(review.bike, {
+			averageRating: allReviews.length ? parseFloat(avgRating.toFixed(1)) : 0,
+			totalRatings: allReviews.length,
+		});
+	}
+
+	return review;
+};
+
+const getPublicReviews = async (): Promise<IReview[]> => {
+	return Review.find()
+		.populate('user', 'name')
+		.populate('bike', 'model brand')
+		.sort({ createdAt: -1 });
+};
+
+
 export const ReviewService = {
 	createReview,
 	likeReview,
 	addComment,
 	addReply,
 	getMyReviews,
+	getPublicReviews,
+	deleteReview,
+	getAllReviews
 };
