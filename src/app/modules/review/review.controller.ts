@@ -74,11 +74,29 @@ export const addReply = catchAsync(async (req: Request, res: Response) => {
 	const userId = req.user._id;
 	const { reviewId, commentId } = req.params;
 	const { text } = req.body;
-	const updated = await ReviewService.addReply(reviewId, commentId, userId, text);
+
+	if (!mongoose.Types.ObjectId.isValid(reviewId) || !mongoose.Types.ObjectId.isValid(commentId)) {
+		return res.status(400).json({ success: false, message: 'Invalid reviewId or commentId' });
+	}
+
+	const updatedReview = await ReviewService.addReply(reviewId, commentId, userId, text);
+
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
-		message: 'Reply added',
-		data: updated,
+		message: 'Reply added to comment',
+		data: updatedReview,
+	});
+});
+
+export const getMyReviews = catchAsync(async (req: Request, res: Response) => {
+	const userId = req.user._id;
+	const reviews = await ReviewService.getMyReviews(userId);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: 'Fetched your reviews successfully',
+		data: reviews,
 	});
 });

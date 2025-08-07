@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import Bike from "../bike/bike.model";
 import { IReview, IReviewInput } from "./review.interface";
 import { Review } from "./review.model";
@@ -41,16 +41,30 @@ const addComment = async (reviewId: string, userId: string, text: string) => {
 	return await review.save();
 };
 
-const addReply = async (reviewId: string, commentId: string, userId: string, text: string) => {
+const addReply = async (
+	reviewId: string,
+	commentId: string,
+	userId: string,
+	text: string
+) => {
 	const review = await Review.findById(reviewId);
 	if (!review) throw new Error('Review not found');
 
 	const comment = review.comments?.id(commentId);
 	if (!comment) throw new Error('Comment not found');
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	comment.replies?.push({ user: userId as any, text });
+	comment.replies?.push({ user: new mongoose.Types.ObjectId(userId), text });
+
 	return await review.save();
+};
+
+const getMyReviews = async (userId: string) => {
+	const reviews = await Review.find({ user: userId })
+		.populate('bike')
+		.populate('comments.user')
+		.populate('comments.replies.user');
+
+	return reviews;
 };
 
 export const ReviewService = {
@@ -58,4 +72,5 @@ export const ReviewService = {
 	likeReview,
 	addComment,
 	addReply,
+	getMyReviews,
 };

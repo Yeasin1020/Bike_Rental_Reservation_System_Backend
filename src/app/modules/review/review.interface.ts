@@ -5,6 +5,7 @@ export interface IReply {
 	user: Types.ObjectId;
 	text: string;
 	createdAt?: Date;
+
 }
 
 // Extend mongoose Document for IComment
