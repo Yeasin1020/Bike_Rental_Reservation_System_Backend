@@ -5,6 +5,7 @@ import { TBike } from "./bike.interface";
 import Bike from "./bike.model";
 import httpStatus from "http-status";
 import ApiError from "../../errors/ApiError";
+import { Review } from "../review/review.model";
 
 
 const createBikeIntoDb = async (bikeData: Partial<TBike>) => {
@@ -31,13 +32,22 @@ const getSingleBikeById = async (id: string) => {
 		throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid bike ID');
 	}
 
-	const bike = await Bike.findById(id).populate('owner', '-password');
+	const bike = await Bike.findById(id).populate('owner', '-password').lean();
 
 	if (!bike) {
 		throw new ApiError(httpStatus.NOT_FOUND, 'Bike not found');
 	}
 
-	return bike;
+	// ✅ Also fetch associated reviews for this bike
+	const reviews = await Review.find({ bike: id })
+		.populate('user', 'name photo') // fetch reviewer name & photo
+		.sort({ createdAt: -1 })
+		.lean();
+
+	return {
+		...bike,
+		reviews, // attach reviews array
+	};
 };
 const updateBikeIntoDb = async (id: string, updateData: Partial<TBike>) => {
 	const updatedBike = await Bike.findByIdAndUpdate(id, updateData, { new: true }).lean().exec();

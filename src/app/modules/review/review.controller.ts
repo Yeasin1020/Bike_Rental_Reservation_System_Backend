@@ -4,7 +4,7 @@ import sendResponse from '../../utils/sendResponse';
 import httpStatus from 'http-status';
 import { ReviewService } from './review.service';
 import Rental from '../rental/rental.model';
-import { Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 
 export const createReview = catchAsync(async (req: Request, res: Response) => {
 	const userId = req.user._id;
@@ -18,7 +18,7 @@ export const createReview = catchAsync(async (req: Request, res: Response) => {
 	}
 
 	const review = await ReviewService.createReview({
-		user: new Types.ObjectId(userId),       // userId is string
+		user: new Types.ObjectId(userId),
 		bike: new Types.ObjectId(bikeId),
 		booking: new Types.ObjectId(bookingId),
 		rating,
@@ -52,7 +52,16 @@ export const addComment = catchAsync(async (req: Request, res: Response) => {
 	const userId = req.user._id;
 	const { reviewId } = req.params;
 	const { text } = req.body;
+
+	if (!mongoose.Types.ObjectId.isValid(reviewId)) {
+		return res.status(400).json({
+			success: false,
+			message: 'Invalid reviewId',
+		});
+	}
+
 	const updated = await ReviewService.addComment(reviewId, userId, text);
+
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,

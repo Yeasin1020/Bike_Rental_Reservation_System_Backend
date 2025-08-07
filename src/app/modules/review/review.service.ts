@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import Bike from "../bike/bike.model";
 import { IReview, IReviewInput } from "./review.interface";
 import { Review } from "./review.model";
@@ -20,12 +21,12 @@ const likeReview = async (reviewId: string, userId: string) => {
 	const review = await Review.findById(reviewId);
 	if (!review) throw new Error('Review not found');
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	if (review.likes?.includes(userId as any)) {
-		review.likes = review.likes.filter(id => id.toString() !== userId);
+	const userObjectId = new Types.ObjectId(userId);
+
+	if (review.likes?.some(id => id.equals(userObjectId))) {
+		review.likes = review.likes.filter(id => !id.equals(userObjectId));
 	} else {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		review.likes?.push(userId as any);
+		review.likes?.push(userObjectId);
 	}
 
 	return await review.save();
